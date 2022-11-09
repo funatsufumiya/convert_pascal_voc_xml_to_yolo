@@ -1,11 +1,11 @@
 ############    Please edit this section only. ###############################################################################################################################################################################################################################
 
 #  The paths must end with '/'.      
-absolutepath_of_directory_with_xmlfiles = 'Enter the absolute path of directory here.'  #　It is okay to have a mix of xml files and images in the same directory.
-absolutepath_of_directory_with_imgfiles = 'Enter the absolute path of directory here.'
-absolutepath_of_directory_with_yolofiles = 'Enter the absolute path of directory here.'  # Yolo files will be created under this directory.
-absolutepath_of_directory_with_classes_txt = 'Enter the absolute path of directory here.'  # You do not need to create classes.txt. classes.txt will be generated automatically.
-absolutepath_of_directory_with_error_txt = 'Enter the absolute path of directory here.'  # The names of files that do not have a paired xml or image file will be written to a text file under this directory.
+absolutepath_of_directory_with_xmlfiles = './pascalvoc/Annotations/'  #　It is okay to have a mix of xml files and images in the same directory.
+absolutepath_of_directory_with_imgfiles = './pascalvoc/JPEGImages/'
+absolutepath_of_directory_with_yolofiles = './yolo_out/'  # Yolo files will be created under this directory.
+absolutepath_of_directory_with_classes_txt = './yolo_classes/'  # You do not need to create classes.txt. classes.txt will be generated automatically.
+absolutepath_of_directory_with_error_txt = './yolo_errors/'  # The names of files that do not have a paired xml or image file will be written to a text file under this directory.
 
 ##############################################################################################################################################################################################################################################################################
 
@@ -61,14 +61,19 @@ class CreateYOLOfile:
         self.img_filename = self.xmlfile_datalists_list.pop()
         self.yolofile_path = absolutepath_of_directory_with_yolofiles + os.path.basename(self.xmlfile_path).split('.', 1)[0] + '.txt'
         self.classes_list = classes_list
+
+        os.makedirs(absolutepath_of_directory_with_yolofiles, exist_ok=True)
+
         try:
             (self.img_height, self.img_width, _) = cv2.imread(absolutepath_of_directory_with_imgfiles + self.img_filename).shape
             self.create_yolofile()
         except:
+            os.makedirs(absolutepath_of_directory_with_error_txt, exist_ok=True)
             with open(absolutepath_of_directory_with_error_txt+'xmlfiles_with_no_paired.txt', 'a') as f:
                 f.write(os.path.basename(self.xmlfile_path)+'\n')
 
     def create_yolofile(self):
+
         for xmlfile_datalist in self.xmlfile_datalists_list:
             yolo_datalist = self.convert_xml_to_yolo_format(xmlfile_datalist)
 
@@ -101,6 +106,8 @@ class CreateClasssesfile:
         self.classes_list = classes_list
 
     def create_classestxt(self):
+        os.makedirs(absolutepath_of_directory_with_classes_txt, exist_ok=True)
+
         with open(absolutepath_of_directory_with_classes_txt + 'classes.txt', 'w') as f:
             for class_name in self.classes_list:
                 f.write(class_name+'\n')
