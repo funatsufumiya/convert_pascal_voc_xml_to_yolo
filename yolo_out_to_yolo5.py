@@ -22,8 +22,23 @@ train_dir = f"{base_dir}{train_dir_name}/"
 valid_dir = f"{base_dir}{valid_dir_name}/"
 yaml_name = f"{dataset_name}.yaml"
 
+tmp_images_dir = "./tmp_images/"
+
 import os
 import random
+
+os.makedirs(tmp_images_dir, exist_ok=True)
+
+# if png, convert to jpg
+for img in os.listdir(absolutepath_of_directory_with_imgfiles):
+    img_name = img.split(".")[0]
+    jpg_name = f"{img_name}.jpg"
+
+    if img.endswith(".jpg"):
+        os.system(f"cp {absolutepath_of_directory_with_imgfiles}{img} {tmp_images_dir}{jpg_name}")
+    else:
+        os.system(f"convert {absolutepath_of_directory_with_imgfiles}{img} {tmp_images_dir}{jpg_name}")
+        # os.remove(f"{absolutepath_of_directory_with_imgfiles}{img}")
 
 labels = []
 with open(f"{absolutepath_of_directory_with_classes_txt}classes.txt", "r") as f:
@@ -69,6 +84,7 @@ for xml_file in xml_files:
         xml = f.read()
         img_file = xml.split("<filename>")[1].split("</filename>")[0]
         key = xml_file.split(".")[0]
+        img_file = img_file.split(".")[0] + ".jpg"
         xml_file_to_img_file[key] = img_file
 
 # print(xml_file_to_img_file)
@@ -90,10 +106,14 @@ for train_file in train_files:
     key = train_file.split(".")[0]
     img_file = xml_file_to_img_file[key]
     os.system(f"cp {absolutepath_of_directory_with_yolofiles}{train_file} {train_dir}labels")
-    os.system(f"cp {absolutepath_of_directory_with_imgfiles}{img_file} {train_dir}images")
+    os.system(f"cp {tmp_images_dir}{img_file} {train_dir}images")
 
 for valid_file in valid_files:
     key = valid_file.split(".")[0]
     img_file = xml_file_to_img_file[key]
     os.system(f"cp {absolutepath_of_directory_with_yolofiles}{valid_file} {valid_dir}labels")
-    os.system(f"cp {absolutepath_of_directory_with_imgfiles}{img_file} {valid_dir}images")
+    os.system(f"cp {tmp_images_dir}{img_file} {valid_dir}images")
+
+# copy classes.txt
+os.system(f"cp {absolutepath_of_directory_with_classes_txt}classes.txt {train_dir}labels")
+os.system(f"cp {absolutepath_of_directory_with_classes_txt}classes.txt {valid_dir}labels")
